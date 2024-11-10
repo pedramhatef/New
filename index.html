@@ -3,13 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guessing Game</title>
+    <title>Guess Drop</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; }
-        #game { margin-top: 20px; }
-        #result { margin-top: 10px; }
-        .number-button { font-size: 1.5em; margin: 5px; }
-        #reset { display: none; margin-top: 20px; }
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Light blue background */
+            background-image: url('https://example.com/background.jpg'); /* Replace with a calm background image URL */
+            background-size: cover;
+            color: #333;
+        }
+        #game {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.8); /* White background with transparency */
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        #result {
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .number-button {
+            font-size: 1.5em;
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .number-button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        #reset {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f44336; /* Red background */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #reset:hover {
+            background-color: #e53935; /* Darker red on hover */
+        }
+        h1 {
+            font-family: 'Comic Sans MS', cursive, sans-serif; /* Game style font */
+            font-size: 3em;
+            color: #ff4500; /* Orange color */
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
@@ -30,81 +77,10 @@
     </script>
 </head>
 <body>
-    <h1>Guessing Game</h1>
+    <h1>Guess Drop</h1>
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
         <div>
             <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
             <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
-            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
-            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
-            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
-        </div>
-        <p id="result"></p>
-        <p>Total Points: <span id="total-points">0</span></p>
-        <button id="reset" onclick="resetGame()">Reset Game</button>
-    </div>
-    <script>
-        let secretNumber = Math.floor(Math.random() * 5) + 1;
-        let attempts = 0;
-        let points = 0;
-        let userId = 'user1'; // Replace with actual user ID logic
-
-        function submitGuess(guess) {
-            attempts++;
-            let reward = 0;
-
-            if (guess === secretNumber) {
-                reward = Math.ceil(100 / attempts);
-                points += reward;
-                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-                document.getElementById('total-points').innerText = points;
-                document.getElementById('reset').style.display = 'block';
-                disableButtons();
-                saveScore();
-            } else {
-                document.getElementById('result').innerText = `Wrong guess. Try again!`;
-            }
-        }
-
-        function disableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        function enableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = false;
-            });
-        }
-
-        function resetGame() {
-            secretNumber = Math.floor(Math.random() * 5) + 1;
-            attempts = 0;
-            document.getElementById('result').innerText = '';
-            document.getElementById('reset').style.display = 'none';
-            enableButtons();
-        }
-
-        function saveScore() {
-            database.ref('users/' + userId).set({
-                points: points
-            });
-        }
-
-        function loadScore() {
-            database.ref('users/' + userId).once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    points = snapshot.val().points;
-                    document.getElementById('total-points').innerText = points;
-                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-                }
-            });
-        }
-
-        loadScore();
-    </script>
-</body>
-</html>
-
+            <button class="
