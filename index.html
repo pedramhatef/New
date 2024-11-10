@@ -34,11 +34,11 @@
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
         <div>
-            <button class="number-button" onclick="submitGuess(1)">1</button>
-            <button class="number-button" onclick="submitGuess(2)">2</button>
-            <button class="number-button" onclick="submitGuess(3)">3</button>
-            <button class="number-button" onclick="submitGuess(4)">4</button>
-            <button class="number-button" onclick="submitGuess(5)">5</button>
+            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
+            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
+            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
+            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
+            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
         </div>
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
@@ -60,10 +60,27 @@
                 document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
                 document.getElementById('total-points').innerText = points;
                 document.getElementById('reset').style.display = 'block';
+                disableButtons();
                 saveScore();
             } else {
                 document.getElementById('result').innerText = `Wrong guess. Try again!`;
             }
+        }
+
+        function disableButtons() {
+            document.getElementById('btn1').disabled = true;
+            document.getElementById('btn2').disabled = true;
+            document.getElementById('btn3').disabled = true;
+            document.getElementById('btn4').disabled = true;
+            document.getElementById('btn5').disabled = true;
+        }
+
+        function enableButtons() {
+            document.getElementById('btn1').disabled = false;
+            document.getElementById('btn2').disabled = false;
+            document.getElementById('btn3').disabled = false;
+            document.getElementById('btn4').disabled = false;
+            document.getElementById('btn5').disabled = false;
         }
 
         function resetGame() {
@@ -71,6 +88,7 @@
             attempts = 0;
             document.getElementById('result').innerText = '';
             document.getElementById('reset').style.display = 'none';
+            enableButtons();
         }
 
         function saveScore() {
@@ -93,4 +111,5 @@
     </script>
 </body>
 </html>
+
 
