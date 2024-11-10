@@ -41,6 +41,7 @@
             <button class="number-button" onclick="submitGuess(5)">5</button>
         </div>
         <p id="result"></p>
+        <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
     </div>
     <script>
@@ -54,9 +55,10 @@
             let reward = 0;
 
             if (guess === secretNumber) {
-                reward = 100 / attempts;
+                reward = Math.ceil(100 / attempts);
                 points += reward;
-                document.getElementById('result').innerText = `Correct! You earned ${reward} points. Total points: ${points}`;
+                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
+                document.getElementById('total-points').innerText = points;
                 document.getElementById('reset').style.display = 'block';
                 saveScore();
             } else {
@@ -81,6 +83,7 @@
             database.ref('users/' + userId).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     points = snapshot.val().points;
+                    document.getElementById('total-points').innerText = points;
                     document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
                 }
             });
