@@ -67,69 +67,86 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         var database = firebase.database();
-<script>
-  let secretNumber = Math.floor(Math.random() * 5) + 1;
-  let attempts = 0;
-  let points = 0;
-  const userId = new URLSearchParams(window.location.search).get("user_id") || "guest";
+    </script>
+</head>
+<body>
+    <h1>Guessing Game</h1>
+    <div id="game">
+        <p>Guess a number between 1 and 5:</p>
+        <div>
+            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
+            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
+            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
+            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
+            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
+        </div>
+        <p id="result"></p>
+        <p>Total Points: <span id="total-points">0</span></p>
+        <button id="reset" onclick="resetGame()">Reset Game</button>
+    </div>
+    <script>
+        let secretNumber = Math.floor(Math.random() * 5) + 1;
+        let attempts = 0;
+        let points = 0;
+        let userId = 'user1'; // Replace with actual user ID logic
 
-  // Save points to Firebase
-  function saveScore() {
-    database.ref('users/' + userId).update({
-      points: points,
-    });
-  }
+        function submitGuess(guess) {
+            attempts++;
+            let reward = 0;
 
-  // Load points from Firebase on start
-  function loadScore() {
-    database.ref('users/' + userId).once('value').then((snapshot) => {
-      if (snapshot.exists() && snapshot.val().points !== undefined) {
-        points = snapshot.val().points;
-        document.getElementById('total-points').innerText = points;
-        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-      }
-    }).catch((error) => {
-      console.error("Error loading score:", error);
-    });
-  }
+            if (guess === secretNumber) {
+                reward = Math.ceil(100 / attempts);
+                points += reward;
+                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
+                document.getElementById('total-points').innerText = points;
+                document.getElementById('reset').style.display = 'block';
+                disableButtons();
+                saveScore();
+            } else {
+                document.getElementById('result').innerText = `Wrong guess. Try again!`;
+            }
+        }
 
-  // Handle guess submission
-  function submitGuess(guess) {
-    attempts++;
-    let reward = 0;
-    if (guess === secretNumber) {
-      reward = Math.ceil(100 / attempts);
-      points += reward;
-      document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-      document.getElementById('total-points').innerText = points;
-      document.getElementById('reset').style.display = 'block';
-      disableButtons();
-      saveScore();
-    } else {
-      document.getElementById('result').innerText = `Wrong guess. Try again!`;
-    }
-  }
+        function disableButtons() {
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = true;
+            });
+        }
 
-  // Enable/Disable buttons
-  function disableButtons() {
-    document.querySelectorAll('.number-button').forEach(button => button.disabled = true);
-  }
-  function enableButtons() {
-    document.querySelectorAll('.number-button').forEach(button => button.disabled = false);
-  }
+        function enableButtons() {
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = false;
+            });
+        }
 
-  // Reset the game
-  function resetGame() {
-    secretNumber = Math.floor(Math.random() * 5) + 1;
-    attempts = 0;
-    document.getElementById('result').innerText = '';
-    document.getElementById('reset').style.display = 'none';
-    enableButtons();
-  }
+        function resetGame() {
+            secretNumber = Math.floor(Math.random() * 5) + 1;
+            attempts = 0;
+            document.getElementById('result').innerText = '';
+            document.getElementById('reset').style.display = 'none';
+            enableButtons();
+        }
 
-  // Load points when the app starts
-  loadScore();
-</script>
+        function saveScore() {
+            database.ref('users/' + userId).set({
+                points: points
+            });
+        }
+
+        function loadScore() {
+            database.ref('users/' + userId).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    points = snapshot.val().points;
+                    document.getElementById('total-points').innerText = points;
+                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                }
+            });
+        }
+
+        loadScore();
+    </script>
+</body>
+</html>
 
 
 
