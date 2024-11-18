@@ -91,11 +91,16 @@
   const userId = new URLSearchParams(window.location.search).get("user_id") || "guest";
 
   // Save points to Firebase
-  function saveScore() {
-    database.ref('users/' + userId).update({
-      points: points,
-    });
-  }
+function saveScore() {
+  database.ref('users/' + userId).update({
+    points: points,
+  }).then(() => {
+    console.log('Points saved successfully:', points);
+  }).catch((error) => {
+    console.error('Error saving points:', error);
+  });
+}
+
 
   // Load points from Firebase on start
   function loadScore() {
