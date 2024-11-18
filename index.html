@@ -9,12 +9,12 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
+            background-color: #f0f8ff; /* Light blue background */
             color: #333;
         }
         h1 {
             font-family: 'Press Start 2P', cursive;
-            color: #ff4500;
+            color: #ff4500; /* Orange-red color */
         }
         #game {
             margin-top: 20px;
@@ -28,13 +28,13 @@
             padding: 10px 20px;
             border: none;
             border-radius: 10px;
-            background-color: #4caf50;
+            background-color: #4caf50; /* Green background */
             color: white;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         .number-button:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Darker green */
         }
         #reset {
             display: none;
@@ -42,19 +42,19 @@
             padding: 10px 20px;
             border: none;
             border-radius: 10px;
-            background-color: #ff4500;
+            background-color: #ff4500; /* Orange-red background */
             color: white;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         #reset:hover {
-            background-color: #e63900;
+            background-color: #e63900; /* Darker orange-red */
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     <script>
-        // Firebase configuration
+        // Your web app's Firebase configuration
         var firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_AUTH_DOMAIN",
@@ -64,79 +64,9 @@
             messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
             appId: "YOUR_APP_ID"
         };
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         var database = firebase.database();
-
-        let secretNumber = Math.floor(Math.random() * 5) + 1;
-        let attempts = 0;
-        let points = 0;
-        const userId = new URLSearchParams(window.location.search).get("user_id") || "guest";
-
-        // Save points to Firebase
-        function saveScore() {
-            database.ref('users/' + userId).update({
-                points: points,
-            }).then(() => {
-                console.log('Points saved successfully:', points);
-            }).catch((error) => {
-                console.error('Error saving points:', error);
-            });
-        }
-
-        // Load points from Firebase on start
-        function loadScore() {
-            database.ref('users/' + userId).once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists() && snapshot.val().points !== undefined) {
-                        points = snapshot.val().points;
-                        document.getElementById('total-points').innerText = points;
-                        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-                        console.log('Points loaded successfully:', points);
-                    } else {
-                        console.log('No points found for user:', userId);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error loading points:', error);
-                });
-        }
-
-        // Handle guess submission
-        function submitGuess(guess) {
-            attempts++;
-            let reward = 0;
-            if (guess === secretNumber) {
-                reward = Math.ceil(100 / attempts);
-                points += reward;
-                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-                document.getElementById('total-points').innerText = points;
-                document.getElementById('reset').style.display = 'block';
-                disableButtons();
-                saveScore();
-            } else {
-                document.getElementById('result').innerText = `Wrong guess. Try again!`;
-            }
-        }
-
-        // Enable/Disable buttons
-        function disableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => button.disabled = true);
-        }
-        function enableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => button.disabled = false);
-        }
-
-        // Reset the game
-        function resetGame() {
-            secretNumber = Math.floor(Math.random() * 5) + 1;
-            attempts = 0;
-            document.getElementById('result').innerText = '';
-            document.getElementById('reset').style.display = 'none';
-            enableButtons();
-        }
-
-        // Load points when the app starts
-        loadScore();
     </script>
 </head>
 <body>
@@ -144,18 +74,95 @@
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
         <div>
-            <button class="number-button" onclick="submitGuess(1)">1</button>
-            <button class="number-button" onclick="submitGuess(2)">2</button>
-            <button class="number-button" onclick="submitGuess(3)">3</button>
-            <button class="number-button" onclick="submitGuess(4)">4</button>
-            <button class="number-button" onclick="submitGuess(5)">5</button>
+            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
+            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
+            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
+            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
+            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
         </div>
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
     </div>
-</body>
-</html>
+<script>
+  let secretNumber = Math.floor(Math.random() * 5) + 1;
+  let attempts = 0;
+  let points = 0;
+  const userId = new URLSearchParams(window.location.search).get("user_id") || localStorage.getItem("user_id") || "guest";
+
+// Save user_id to localStorage for future sessions
+if (!localStorage.getItem("user_id")) {
+  localStorage.setItem("user_id", userId);
+}
+
+
+  // Save points to Firebase
+function saveScore() {
+  database.ref('users/' + userId).update({
+    points: points,
+  }).then(() => {
+    console.log(`Points saved successfully for user ${userId}: ${points}`);
+  }).catch((error) => {
+    console.error(`Error saving points for user ${userId}:`, error);
+  });
+}
+
+function loadScore() {
+  database.ref('users/' + userId).once('value')
+    .then((snapshot) => {
+      if (snapshot.exists() && snapshot.val().points !== undefined) {
+        points = snapshot.val().points;
+        document.getElementById('total-points').innerText = points;
+        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+        console.log(`Points loaded successfully for user ${userId}: ${points}`);
+      } else {
+        console.log(`No points found for user ${userId}`);
+      }
+    })
+    .catch((error) => {
+      console.error(`Error loading points for user ${userId}:`, error);
+    });
+}
+
+
+  // Handle guess submission
+function submitGuess(guess) {
+  attempts++;
+  let reward = 0;
+  if (guess === secretNumber) {
+    reward = Math.ceil(100 / attempts);
+    points += reward;
+    document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
+    document.getElementById('total-points').innerText = points;
+    document.getElementById('reset').style.display = 'block';
+    disableButtons();
+    saveScore(); // Save immediately after updating points
+  } else {
+    document.getElementById('result').innerText = `Wrong guess. Try again!`;
+  }
+}
+
+
+  // Enable/Disable buttons
+  function disableButtons() {
+    document.querySelectorAll('.number-button').forEach(button => button.disabled = true);
+  }
+  function enableButtons() {
+    document.querySelectorAll('.number-button').forEach(button => button.disabled = false);
+  }
+
+  // Reset the game
+  function resetGame() {
+    secretNumber = Math.floor(Math.random() * 5) + 1;
+    attempts = 0;
+    document.getElementById('result').innerText = '';
+    document.getElementById('reset').style.display = 'none';
+    enableButtons();
+  }
+
+  // Load points when the app starts
+  loadScore();
+</script>
 
 
 
