@@ -97,71 +97,66 @@ if (!localStorage.getItem("user_id")) {
 
 
   // Save points to Firebase
-function saveScore() {
-  database.ref('users/' + userId).update({
-    points: points,
-  }).then(() => {
-    console.log(`Points saved successfully for user ${userId}: ${points}`);
-  }).catch((error) => {
-    console.error(`Error saving points for user ${userId}:`, error);
-  });
-}
+    function loadScore() {
+        database.ref('users/' + userId).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    points = userData.points || 0; // Set points to 0 if undefined
+                    document.getElementById('total-points').innerText = points;
+                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                    console.log('Points loaded successfully:', points);
+                } else {
+                    console.log('No data found for user:', userId);
+                    points = 0; // Default to 0 points
+                }
+            })
+            .catch((error) => {
+                console.error('Error loading points:', error);
+            });
+    }
 
-function loadScore() {
-  database.ref('users/' + userId).once('value')
-    .then((snapshot) => {
-      if (snapshot.exists() && snapshot.val().points !== undefined) {
-        points = snapshot.val().points;
-        document.getElementById('total-points').innerText = points;
-        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-        console.log(`Points loaded successfully for user ${userId}: ${points}`);
-      } else {
-        console.log(`No points found for user ${userId}`);
-      }
-    })
-    .catch((error) => {
-      console.error(`Error loading points for user ${userId}:`, error);
-    });
-}
+    // Save points to Firebase
+    function saveScore() {
+        database.ref('users/' + userId).update({
+            points: points,
+        }).then(() => {
+            console.log('Points saved successfully:', points);
+        }).catch((error) => {
+            console.error('Error saving points:', error);
+        });
+    }
 
+    // Call loadScore on game load
+    loadScore();
 
-  // Handle guess submission
-function submitGuess(guess) {
-  attempts++;
-  let reward = 0;
-  if (guess === secretNumber) {
-    reward = Math.ceil(100 / attempts);
-    points += reward;
-    document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-    document.getElementById('total-points').innerText = points;
-    document.getElementById('reset').style.display = 'block';
-    disableButtons();
-    saveScore(); // Save immediately after updating points
-  } else {
-    document.getElementById('result').innerText = `Wrong guess. Try again!`;
-  }
-}
+    // Submit a guess
+    function submitGuess(guess) {
+        attempts++;
+        let reward = 0;
+        if (guess === secretNumber) {
+            reward = Math.ceil(100 / attempts);
+            points += reward;
+            document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
+            document.getElementById('total-points').innerText = points;
+            document.getElementById('reset').style.display = 'block';
+            disableButtons();
+            saveScore(); // Save updated points to Firebase
+        } else {
+            document.getElementById('result').innerText = `Wrong guess. Try again!`;
+        }
+    }
 
+    // Reset the game
+    function resetGame() {
+        secretNumber = Math.floor(Math.random() * 5) + 1;
+        attempts = 0;
+        document.getElementById('result').innerText = '';
+        document.getElementById('reset').style.display = 'none';
+        enableButtons();
+    }
 
-  // Enable/Disable buttons
-  function disableButtons() {
-    document.querySelectorAll('.number-button').forEach(button => button.disabled = true);
-  }
-  function enableButtons() {
-    document.querySelectorAll('.number-button').forEach(button => button.disabled = false);
-  }
-
-  // Reset the game
-  function resetGame() {
-    secretNumber = Math.floor(Math.random() * 5) + 1;
-    attempts = 0;
-    document.getElementById('result').innerText = '';
-    document.getElementById('reset').style.display = 'none';
-    enableButtons();
-  }
-
-  // Load points when the app starts
-  loadScore();
+    loadScore(); // Ensure points are loaded when the page is reloaded
 </script>
 
 
