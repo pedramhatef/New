@@ -103,17 +103,23 @@ function saveScore() {
 
 
   // Load points from Firebase on start
-  function loadScore() {
-    database.ref('users/' + userId).once('value').then((snapshot) => {
+function loadScore() {
+  database.ref('users/' + userId).once('value')
+    .then((snapshot) => {
       if (snapshot.exists() && snapshot.val().points !== undefined) {
         points = snapshot.val().points;
         document.getElementById('total-points').innerText = points;
         document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+        console.log('Points loaded successfully:', points);
+      } else {
+        console.log('No points found for user:', userId);
       }
-    }).catch((error) => {
-      console.error("Error loading score:", error);
+    })
+    .catch((error) => {
+      console.error('Error loading points:', error);
     });
-  }
+}
+
 
   // Handle guess submission
   function submitGuess(guess) {
