@@ -2,6 +2,22 @@
 <html>
 <head>
     <title>Guessing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #points {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
     <script>
         let userId = new URLSearchParams(window.location.search).get('user_id');
         let points = 0;
