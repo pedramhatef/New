@@ -50,71 +50,52 @@
         #reset:hover {
             background-color: #e63900; /* Darker orange-red */
         }
+        /* Footer styles */
+        #footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .footer-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .footer-button span {
+            margin-top: 5px;
+            font-size: 0.8em;
+        }
+        .footer-button:hover {
+            color: #ff4500; /* Highlight color */
+        }
     </style>
     <script>
-        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1';
-        let secretNumber = Math.floor(Math.random() * 5) + 1;
-        let attempts = 0;
-        let points = 0;
-
-        function submitGuess(guess) {
-            attempts++;
-            let reward = 0;
-
-            if (guess === secretNumber) {
-                reward = Math.ceil(100 / attempts);
-                points += reward;
-                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-                document.getElementById('total-points').innerText = points;
-                document.getElementById('reset').style.display = 'block';
-                disableButtons();
-                savePoints();
-            } else {
-                document.getElementById('result').innerText = `Wrong guess. Try again!`;
-            }
+        function openWallet() {
+            // Add functionality for wallet button here
+            alert("Wallet button clicked!");
         }
 
-        function disableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = true;
-            });
+        function openTasks() {
+            // Add functionality for tasks button here
+            alert("Tasks button clicked!");
         }
 
-        function enableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = false;
-            });
+        function openFire() {
+            // Add functionality for fire button here
+            alert("Fire button clicked!");
         }
-
-        function resetGame() {
-            secretNumber = Math.floor(Math.random() * 5) + 1;
-            attempts = 0;
-            document.getElementById('result').innerText = '';
-            document.getElementById('reset').style.display = 'none';
-            enableButtons();
-        }
-
-        function savePoints() {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ points: points })
-            });
-        }
-
-        function loadPoints() {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
-                .then(response => response.json())
-                .then(data => {
-                    points = data.points || 0;
-                    document.getElementById('total-points').innerText = points;
-                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-                });
-        }
-
-        window.onload = loadPoints;
     </script>
 </head>
 <body>
@@ -131,6 +112,22 @@
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+        <button class="footer-button" onclick="openWallet()">
+            💰
+            <span>Wallet</span>
+        </button>
+        <button class="footer-button" onclick="openTasks()">
+            ✅
+            <span>Tasks</span>
+        </button>
+        <button class="footer-button" onclick="openFire()">
+            🔥
+            <span>Fire</span>
+        </button>
     </div>
 </body>
 </html>
