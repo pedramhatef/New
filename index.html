@@ -82,20 +82,81 @@
         }
     </style>
     <script>
-        function Wallet() {
-            // Add functionality for wallet button here
-            
+        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1';
+        let secretNumber = Math.floor(Math.random() * 5) + 1;
+        let attempts = 0;
+        let points = 0;
+
+        function submitGuess(guess) {
+            attempts++;
+            let reward = 0;
+
+            if (guess === secretNumber) {
+                reward = Math.ceil(100 / attempts);
+                points += reward;
+                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
+                document.getElementById('total-points').innerText = points;
+                document.getElementById('reset').style.display = 'block';
+                disableButtons();
+                savePoints();
+            } else {
+                document.getElementById('result').innerText = 'Wrong guess. Try again!';
+            }
         }
 
-        function Tasks() {
-            // Add functionality for tasks button here
-            
+        function disableButtons() {
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = true;
+            });
         }
 
-        function airdro() {
-            // Add functionality for fire button here
-            
+        function enableButtons() {
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = false;
+            });
         }
+
+        function resetGame() {
+            secretNumber = Math.floor(Math.random() * 5) + 1;
+            attempts = 0;
+            document.getElementById('result').innerText = '';
+            document.getElementById('reset').style.display = 'none';
+            enableButtons();
+        }
+
+        function savePoints() {
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ points: points })
+            });
+        }
+
+        function loadPoints() {
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
+                .then(response => response.json())
+                .then(data => {
+                    points = data.points || 0;
+                    document.getElementById('total-points').innerText = points;
+                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                });
+        }
+
+        function openWallet() {
+            alert("Wallet button clicked!");
+        }
+
+        function openTasks() {
+            alert("Tasks button clicked!");
+        }
+
+        function openFire() {
+            alert("Fire button clicked!");
+        }
+
+        window.onload = loadPoints;
     </script>
 </head>
 <body>
@@ -103,11 +164,11 @@
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
         <div>
-            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
-            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
-            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
-            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
-            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
+            <button class="number-button" onclick="submitGuess(1)">1</button>
+            <button class="number-button" onclick="submitGuess(2)">2</button>
+            <button class="number-button" onclick="submitGuess(3)">3</button>
+            <button class="number-button" onclick="submitGuess(4)">4</button>
+            <button class="number-button" onclick="submitGuess(5)">5</button>
         </div>
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
@@ -116,21 +177,22 @@
 
     <!-- Footer -->
     <div id="footer">
-        <button class="footer-button" onclick="Wallet()">
+        <button class="footer-button" onclick="openWallet()">
             💰
             <span>Wallet</span>
         </button>
-        <button class="footer-button" onclick="Tasks()">
+        <button class="footer-button" onclick="openTasks()">
             ✅
             <span>Tasks</span>
         </button>
-        <button class="footer-button" onclick="airdrop()">
+        <button class="footer-button" onclick="openFire()">
             🔥
             <span>Fire</span>
         </button>
     </div>
 </body>
 </html>
+
 
 
 
