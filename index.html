@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guessing Game with Telegram Wallet</title>
+    <title>Guessing Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
@@ -146,7 +146,12 @@
 
         // Open the wallet page within the Telegram Mini App
         function openWallet() {
-            Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/');
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log("Wallet button pressed");  // Debugging log
+                window.Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/');
+            } else {
+                console.error("Telegram WebApp API not loaded correctly");
+            }
         }
 
         function openTasks() {
@@ -158,16 +163,6 @@
         }
 
         window.onload = loadPoints;
-
-        // Initialize Telegram WebApp
-        window.Telegram = window.Telegram || { WebApp: {} };
-        Telegram.WebApp.ready();
-
-        // Button functionality
-        document.getElementById('walletButton').onclick = function() {
-            console.log("Wallet button pressed");
-            Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/');
-        };
     </script>
 </head>
 <body>
@@ -203,6 +198,7 @@
     </div>
 </body>
 </html>
+
 
 
 
