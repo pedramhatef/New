@@ -146,13 +146,12 @@
         }
 
         // Open the wallet page within the Telegram Mini App
-        Telegram.WebApp.ready();
         function openWallet() {
+            const walletUrl = `https://pedramhatef.github.io/my-twa/?user_id=${userId}`;
             if (window.Telegram && window.Telegram.WebApp) {
-                console.log("Telegram WebApp is loaded!");
-                window.Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/'); // Open wallet connection
+                window.Telegram.WebApp.openLink(walletUrl);
             } else {
-                console.error("Telegram WebApp API not loaded correctly.");
+                window.open(walletUrl, "_blank");
             }
         }
 
@@ -207,6 +206,7 @@
     </div>
 </body>
 </html>
+
 
 
 
