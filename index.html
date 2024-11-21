@@ -83,17 +83,33 @@
     </style>
     <script>
         function openWallet() {
-            // Add functionality for wallet button here
-            alert("Wallet button clicked!");
+            // Open a dark background page
+            const newWindow = window.open("", "_blank");
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Wallet</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            background-color: #000; /* Black background */
+                            height: 100vh;
+                        }
+                    </style>
+                </head>
+                <body></body>
+                </html>
+            `);
         }
 
         function openTasks() {
-            // Add functionality for tasks button here
             alert("Tasks button clicked!");
         }
 
         function openFire() {
-            // Add functionality for fire button here
             alert("Fire button clicked!");
         }
     </script>
