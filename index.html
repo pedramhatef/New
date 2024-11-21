@@ -147,12 +147,13 @@
 
         // Open the wallet page within the Telegram Mini App
         function openWallet() {
+            const userId = Telegram.WebApp.initDataUnsafe.user.id; // Ensure userId is retrieved from Telegram WebApp context
             const walletUrl = `https://pedramhatef.github.io/my-twa/?user_id=${userId}`;
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.openLink(walletUrl);
-            } else {
-                window.open(walletUrl, "_blank");
-            }
+            } else {  
+                console.error("Telegram WebApp API not loaded correctly.");
+            }   
         }
 
         function openTasks() {
