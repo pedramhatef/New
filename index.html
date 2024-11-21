@@ -144,8 +144,9 @@
                 });
         }
 
+        // Open the wallet page within the Telegram Mini App
         function openWallet() {
-            alert("Wallet button clicked!");
+            Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/');
         }
 
         function openTasks() {
@@ -164,11 +165,11 @@
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
         <div>
-            <button class="number-button" onclick="submitGuess(1)">1</button>
-            <button class="number-button" onclick="submitGuess(2)">2</button>
-            <button class="number-button" onclick="submitGuess(3)">3</button>
-            <button class="number-button" onclick="submitGuess(4)">4</button>
-            <button class="number-button" onclick="submitGuess(5)">5</button>
+            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
+            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
+            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
+            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
+            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
         </div>
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
@@ -192,6 +193,7 @@
     </div>
 </body>
 </html>
+
 
 
 
