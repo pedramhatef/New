@@ -147,10 +147,10 @@
         // Open the wallet page within the Telegram Mini App
         function openWallet() {
             if (window.Telegram && window.Telegram.WebApp) {
-                console.log("Wallet button pressed");  // Debugging log
+                console.log("Telegram WebApp is loaded!");
                 window.Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/');
             } else {
-                console.error("Telegram WebApp API not loaded correctly");
+                console.error("Telegram WebApp API not loaded correctly.");
             }
         }
 
@@ -162,7 +162,14 @@
             alert("Fire button clicked!");
         }
 
-        window.onload = loadPoints;
+        window.onload = function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log("Telegram WebApp is loaded!");
+            } else {
+                console.error("Telegram WebApp API not loaded correctly.");
+            }
+            loadPoints();
+        };
     </script>
 </head>
 <body>
@@ -198,6 +205,7 @@
     </div>
 </body>
 </html>
+
 
 
 
