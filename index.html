@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guessing Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             text-align: center;
@@ -145,6 +146,7 @@
         }
 
         // Open the wallet page within the Telegram Mini App
+        Telegram.WebApp.ready();
         function openWallet() {
             if (window.Telegram && window.Telegram.WebApp) {
                 console.log("Telegram WebApp is loaded!");
