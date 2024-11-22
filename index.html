@@ -168,7 +168,11 @@
             // Check if the "Yes" button was pressed
             if (eventData.button_id === "yes") {
                 console.log("Yes button clicked, opening link...");
-                Telegram.WebApp.openLink("https://pedramhatef.github.io/my-twa/");
+                
+                // Open the link in the WebView (within the mini app)
+                Telegram.WebApp.openLink("https://pedramhatef.github.io/my-twa/", {
+                    inWebView: true,  // Open the URL inside the WebView
+                });
             } else {
                 console.log("No button clicked or popup closed without action.");
             }
@@ -178,7 +182,6 @@
         alert("Please open this app within Telegram!");
     }
 }
-
 
 
 
