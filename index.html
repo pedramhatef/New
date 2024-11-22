@@ -82,54 +82,72 @@
             color: #ff4500; /* Highlight color */
         }
     </style>
-</head>
-<body>
-    <h1>Guessing Game</h1>
-    <div id="game">
-        <p>Guess a number between 1 and 5:</p>
-        <div>
-            <button class="number-button" onclick="submitGuess(1)">1</button>
-            <button class="number-button" onclick="submitGuess(2)">2</button>
-            <button class="number-button" onclick="submitGuess(3)">3</button>
-            <button class="number-button" onclick="submitGuess(4)">4</button>
-            <button class="number-button" onclick="submitGuess(5)">5</button>
-        </div>
-        <p id="result"></p>
-        <p>Total Points: <span id="total-points">0</span></p>
-        <button id="reset" onclick="resetGame()">Reset Game</button>
-    </div>
-
-    <!-- Footer -->
-    <div id="footer">
-        <button class="footer-button" id="openWallet">
-            💰
-            <span>Wallet</span>
-        </button>
-        <button class="footer-button" id="openTasks">
-            ✅
-            <span>Tasks</span>
-        </button>
-        <button class="footer-button" id="openFire">
-            🔥
-            <span>Fire</span>
-        </button>
-    </div>
-
-    <p id="output" style="margin-top: 20px; color: red;"></p>
-
     <script>
-        const userId = Telegram.WebApp.initDataUnsafe?.user?.id || null;
+        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1';
+        let secretNumber = Math.floor(Math.random() * 5) + 1;
+        let attempts = 0;
+        let points = 0;
 
         function submitGuess(guess) {
-            // Logic for the guessing game (omitted for brevity, as it was already provided)
+            attempts++;
+            let reward = 0;
+
+            if (guess === secretNumber) {
+                reward = Math.ceil(100 / attempts);
+                points += reward;
+                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
+                document.getElementById('total-points').innerText = points;
+                document.getElementById('reset').style.display = 'block';
+                disableButtons();
+                savePoints();
+            } else {
+                document.getElementById('result').innerText = 'Wrong guess. Try again!';
+            }
+        }
+
+        function disableButtons() {
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = true;
+            });
+        }
+
+        function enableButtons() {
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = false;
+            });
         }
 
         function resetGame() {
-            // Logic for resetting the game (omitted for brevity, as it was already provided)
+            secretNumber = Math.floor(Math.random() * 5) + 1;
+            attempts = 0;
+            document.getElementById('result').innerText = '';
+            document.getElementById('reset').style.display = 'none';
+            enableButtons();
         }
 
-        // Event handlers for the footer buttons
-        document.getElementById('openWallet').addEventListener('click', async () => {
+        function savePoints() {
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ points: points })
+            });
+        }
+
+        function loadPoints() {
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
+                .then(response => response.json())
+                .then(data => {
+                    points = data.points || 0;
+                    document.getElementById('total-points').innerText = points;
+                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                });
+        }
+
+        // Open the wallet page within the Telegram Mini App
+        function openWallet() {
+            document.getElementById('openWallet').addEventListener('click', async () => {
             const output = document.getElementById('output');
             if (!userId) {
                 output.textContent = 'User ID not available. Please reauthenticate.';
@@ -170,9 +188,69 @@
                 console.error('Telegram WebApp API not loaded correctly.');
             }
         };
+
+        function openTasks() {
+            alert("Tasks button clicked!");
+        }
+
+        function openFire() {
+            alert("Fire button clicked!");
+        }
+
+        window.onload = function() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log("Telegram WebApp is loaded!");
+            } else {
+                console.error("Telegram WebApp API not loaded correctly.");
+            }
+            loadPoints();
+        };
     </script>
+</head>
+<body>
+    <h1>Guessing Game</h1>
+    <div id="game">
+        <p>Guess a number between 1 and 5:</p>
+        <div>
+            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
+            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
+            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
+            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
+            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
+        </div>
+        <p id="result"></p>
+        <p>Total Points: <span id="total-points">0</span></p>
+        <button id="reset" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+        <button class="footer-button" onclick="openWallet()">
+            💰
+            <span>Wallet</span>
+        </button>
+        <button class="footer-button" onclick="openTasks()">
+            ✅
+            <span>Tasks</span>
+        </button>
+        <button class="footer-button" onclick="openFire()">
+            🔥
+            <span>Fire</span>
+        </button>
+    </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
