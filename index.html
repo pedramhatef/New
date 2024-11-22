@@ -158,16 +158,22 @@
             ],
         });
 
-        // Listen for popup button events
-        Telegram.WebApp.onEvent("popupClosed", (buttonId) => {
-            if (buttonId === "yes") {
+        // Listen for the popupClosed event
+        Telegram.WebApp.onEvent("popupClosed", (eventData) => {
+            // Check if the "Yes" button was pressed
+            if (eventData.button_id === "yes") {
                 Telegram.WebApp.openLink("https://pedramhatef.github.io/my-twa/");
             }
         });
     } else {
         alert("Please open this app within Telegram!");
     }
+            console.log("Popup closed:", eventData);
+            console.log(window.Telegram.WebApp.initData);
+
+
 }
+
 
 
         function openTasks() {
