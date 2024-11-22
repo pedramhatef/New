@@ -149,6 +149,9 @@
         Telegram.WebApp.ready();
         function openWallet() {
     if (window.Telegram && window.Telegram.WebApp) {
+        console.log("Telegram WebApp initialized");  // Check if Telegram WebApp is available
+
+        // Show the popup
         Telegram.WebApp.showPopup({
             title: "Open Wallet",
             message: "Do you want to open your wallet?",
@@ -160,19 +163,22 @@
 
         // Listen for the popupClosed event
         Telegram.WebApp.onEvent("popupClosed", (eventData) => {
+            console.log("Popup closed event data:", eventData);  // Log the event data to see which button was clicked
+            
             // Check if the "Yes" button was pressed
             if (eventData.button_id === "yes") {
+                console.log("Yes button clicked, opening link...");
                 Telegram.WebApp.openLink("https://pedramhatef.github.io/my-twa/");
+            } else {
+                console.log("No button clicked or popup closed without action.");
             }
         });
     } else {
+        console.log("Telegram WebApp is not available.");  // Check if Telegram WebApp is not initialized properly
         alert("Please open this app within Telegram!");
     }
-            console.log("Popup closed:", eventData);
-            console.log(window.Telegram.WebApp.initData);
-
-
 }
+
 
 
 
