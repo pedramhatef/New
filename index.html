@@ -83,11 +83,12 @@
         }
     </style>
     <script>
-        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1';
+        let userId = Telegram.WebApp.initDataUnsafe?.user?.id || 'user1'; // Get user ID from Telegram WebApp
         let secretNumber = Math.floor(Math.random() * 5) + 1;
         let attempts = 0;
         let points = 0;
 
+        // Function to submit the user's guess
         function submitGuess(guess) {
             attempts++;
             let reward = 0;
@@ -105,18 +106,21 @@
             }
         }
 
+        // Disable all guess buttons
         function disableButtons() {
             document.querySelectorAll('.number-button').forEach(button => {
                 button.disabled = true;
             });
         }
 
+        // Enable all guess buttons
         function enableButtons() {
             document.querySelectorAll('.number-button').forEach(button => {
                 button.disabled = false;
             });
         }
 
+        // Reset the game
         function resetGame() {
             secretNumber = Math.floor(Math.random() * 5) + 1;
             attempts = 0;
@@ -125,6 +129,7 @@
             enableButtons();
         }
 
+        // Save the user's points to a database
         function savePoints() {
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
                 method: 'PATCH',
@@ -135,6 +140,7 @@
             });
         }
 
+        // Load the user's points from the database
         function loadPoints() {
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
                 .then(response => response.json())
@@ -146,32 +152,42 @@
         }
 
         // Open the wallet page within the Telegram Mini App
-        function openWallet() {
-            const data = { key: 'value' }; // Replace with your actual data
-            fetch('https://pedramhatef.github.io/my-twa/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
+        document.getElementById('openWallet').addEventListener('click', async () => {
+            const output = document.getElementById('output');
+            if (!userId) {
+                output.textContent = 'User ID not available. Please reauthenticate.';
+                return;
+            }
+            try {
+                const response = await fetch('https://pedramhatef.github.io/my-twa/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.href = 'https://pedramhatef.github.io/my-twa/';
+                } else {
+                    output.textContent = `Error: ${data.message || 'Failed to open wallet'}`;
+                }
+            } catch (error) {
+                output.textContent = `Error: ${error.message}`;
+            }
+        });
 
-        function openTasks() {
-            alert("Tasks button clicked!");
-        }
+        // Placeholder for tasks button (not implemented)
+        document.getElementById('openTasks').addEventListener('click', () => {
+            alert('Tasks functionality is not implemented yet.');
+        });
 
-        function openFire() {
-            alert("Fire button clicked!");
-        }
+        // Placeholder for fire button (not implemented)
+        document.getElementById('openFire').addEventListener('click', () => {
+            alert('Fire functionality is not implemented yet.');
+        });
 
+        // Initialize the game when the page loads
         window.onload = function() {
             if (window.Telegram && window.Telegram.WebApp) {
                 console.log("Telegram WebApp is loaded!");
@@ -200,21 +216,22 @@
 
     <!-- Footer -->
     <div id="footer">
-        <button class="footer-button" onclick="openWallet()">
+        <button class="footer-button" id="openWallet">
             💰
             <span>Wallet</span>
         </button>
-        <button class="footer-button" onclick="openTasks()">
+        <button class="footer-button" id="openTasks">
             ✅
             <span>Tasks</span>
         </button>
-        <button class="footer-button" onclick="openFire()">
+        <button class="footer-button" id="openFire">
             🔥
             <span>Fire</span>
         </button>
     </div>
 </body>
 </html>
+
 
 
 
