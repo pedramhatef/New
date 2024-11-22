@@ -1,4 +1,4 @@
-Html :  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -95,7 +95,7 @@ Html :  <!DOCTYPE html>
             if (guess === secretNumber) {
                 reward = Math.ceil(100 / attempts);
                 points += reward;
-                document.getElementById('result').innerText = Correct! You earned ${reward} points.;
+                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
                 document.getElementById('total-points').innerText = points;
                 document.getElementById('reset').style.display = 'block';
                 disableButtons();
@@ -126,7 +126,7 @@ Html :  <!DOCTYPE html>
         }
 
         function savePoints() {
-            fetch(https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json, {
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -136,32 +136,24 @@ Html :  <!DOCTYPE html>
         }
 
         function loadPoints() {
-            fetch(https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json)
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
                 .then(response => response.json())
                 .then(data => {
                     points = data.points || 0;
                     document.getElementById('total-points').innerText = points;
-                    document.getElementById('result').innerText = Welcome back! Your total points: ${points};
+                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
                 });
         }
 
         // Open the wallet page within the Telegram Mini App
+        Telegram.WebApp.ready();
         function openWallet() {
-            const data = { key: 'value' }; // Replace with your actual data
-            fetch('https://pedramhatef.github.io/my-twa/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log("Telegram WebApp is loaded!");
+                window.Telegram.WebApp.openLink('https://pedramhatef.github.io/my-twa/'); // Open wallet connection
+            } else {
+                console.error("Telegram WebApp API not loaded correctly.");
+            }
         }
 
         function openTasks() {
@@ -215,21 +207,6 @@ Html :  <!DOCTYPE html>
     </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
