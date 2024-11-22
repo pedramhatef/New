@@ -148,14 +148,27 @@
         // Open the wallet page within the Telegram Mini App
         Telegram.WebApp.ready();
         function openWallet() {
-                if (window.Telegram && window.Telegram.WebApp) {
-                   console.log("Opening wallet in Telegram Mini App...");
-                   Telegram.WebApp.showPopup('https://pedramhatef.github.io/my-twa/');
-                } else {
-        console.error("Telegram WebApp API not loaded correctly. Cannot open the link.");
-        alert("This functionality works only inside the Telegram Mini App.");
-                }
-        }
+    if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.showPopup({
+            title: "Open Wallet",
+            message: "Do you want to open your wallet?",
+            buttons: [
+                { id: "yes", type: "default", text: "Yes" },
+                { id: "no", type: "default", text: "No" },
+            ],
+        });
+
+        // Listen for popup button events
+        Telegram.WebApp.onEvent("popupClosed", (buttonId) => {
+            if (buttonId === "yes") {
+                Telegram.WebApp.openLink("https://pedramhatef.github.io/my-twa/");
+            }
+        });
+    } else {
+        alert("Please open this app within Telegram!");
+    }
+}
+
 
         function openTasks() {
             alert("Tasks button clicked!");
