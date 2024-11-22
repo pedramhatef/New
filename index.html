@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guessing Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             text-align: center;
@@ -83,107 +82,28 @@
         }
     </style>
     <script>
-        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1';
-        let secretNumber = Math.floor(Math.random() * 5) + 1;
-        let attempts = 0;
-        let points = 0;
-
-        function submitGuess(guess) {
-            attempts++;
-            let reward = 0;
-
-            if (guess === secretNumber) {
-                reward = Math.ceil(100 / attempts);
-                points += reward;
-                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-                document.getElementById('total-points').innerText = points;
-                document.getElementById('reset').style.display = 'block';
-                disableButtons();
-                savePoints();
-            } else {
-                document.getElementById('result').innerText = 'Wrong guess. Try again!';
-            }
-        }
-
-        function disableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        function enableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = false;
-            });
-        }
-
-        function resetGame() {
-            secretNumber = Math.floor(Math.random() * 5) + 1;
-            attempts = 0;
-            document.getElementById('result').innerText = '';
-            document.getElementById('reset').style.display = 'none';
-            enableButtons();
-        }
-
-        function savePoints() {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ points: points })
-            });
-        }
-
-        function loadPoints() {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
-                .then(response => response.json())
-                .then(data => {
-                    points = data.points || 0;
-                    document.getElementById('total-points').innerText = points;
-                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-                });
-        }
-
-        // Open the wallet page within the Telegram Mini App
-        Telegram.WebApp.ready();
         function openWallet() {
-    if (window.Telegram && window.Telegram.WebApp) {
-        console.log("Telegram WebApp initialized");  // Check if Telegram WebApp is available
-
-        // Show the popup
-        Telegram.WebApp.showPopup({
-            title: "Open Wallet",
-            message: "Do you want to open your wallet?",
-            buttons: [
-                { id: "yes", type: "default", text: "Yes" },
-                { id: "no", type: "default", text: "No" },
-            ],
-        });
-
-        // Listen for the popupClosed event
-        Telegram.WebApp.onEvent("popupClosed", (eventData) => {
-            console.log("Popup closed event data:", eventData);  // Log the event data to see which button was clicked
-            
-            // Check if the "Yes" button was pressed
-            if (eventData.button_id === "yes") {
-                console.log("Yes button clicked, opening link...");
-                
-                // Open the link in the WebView (within the mini app)
-                Telegram.WebApp.openLink("https://pedramhatef.github.io/my-twa/", {
-                    inWebView: true,  // Open the URL inside the WebView
-                });
-            } else {
-                console.log("No button clicked or popup closed without action.");
-            }
-        });
-    } else {
-        console.log("Telegram WebApp is not available.");  // Check if Telegram WebApp is not initialized properly
-        alert("Please open this app within Telegram!");
-    }
-}
-
-
+            // Open a dark background page
+            const newWindow = window.open("", "_blank");
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Wallet</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            background-color: #000; /* Black background */
+                            height: 100vh;
+                        }
+                    </style>
+                </head>
+                <body></body>
+                </html>
+            `);
+        }
 
         function openTasks() {
             alert("Tasks button clicked!");
@@ -192,15 +112,6 @@
         function openFire() {
             alert("Fire button clicked!");
         }
-
-        window.onload = function() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                console.log("Telegram WebApp is loaded!");
-            } else {
-                console.error("Telegram WebApp API not loaded correctly.");
-            }
-            loadPoints();
-        };
     </script>
 </head>
 <body>
@@ -236,12 +147,6 @@
     </div>
 </body>
 </html>
-
-
-
-
-
-
 
 
 
