@@ -139,9 +139,18 @@
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
                 .then(response => response.json())
                 .then(data => {
-                    points = data.points || 0;
-                    document.getElementById('total-points').innerText = points;
-                    document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                    if (data) {
+                        points = data.points || 0;
+                        document.getElementById('total-points').innerText = points;
+                        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                    } else {
+                        console.warn("No data found for user:", userId);
+                        document.getElementById('result').innerText = "Welcome! No points found.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading points:", error);
+                    document.getElementById('result').innerText = "Error loading points. Please try again.";
                 });
         }
 
@@ -203,16 +212,3 @@
     </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
