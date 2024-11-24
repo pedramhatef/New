@@ -183,40 +183,26 @@
                 });
         }
 
-function App() {
-  return (
-    <div>
-      <button id="earnButton" onClick={handleEarnClick}>
-        <img src="earn-logo.png" alt="Earn Logo" />
-        💰 Earn
-      </button>
-    </div>
-  );
-}
+        function openWallet() {
+            const iframe = document.getElementById('wallet-frame');
+            const game = document.getElementById('game');
+            const backButton = document.getElementById('back-button');
 
-function handleEarnClick() {
-  const layer = document.createElement('div');
-  layer.setAttribute('id', 'earnLayer');
+            iframe.src = 'https://pedramhatef.github.io/my-twa/';
+            iframe.style.display = 'block';
+            game.style.display = 'none';
+            backButton.style.display = 'block';
+        }
 
-  const textBox1 = document.createElement('input');
-  textBox1.setAttribute('type', 'text');
-  textBox1.setAttribute('placeholder', 'Textbox 1');
+        function goBack() {
+            const iframe = document.getElementById('wallet-frame');
+            const game = document.getElementById('game');
+            const backButton = document.getElementById('back-button');
 
-  const textBox2 = document.createElement('input');
-  textBox2.setAttribute('type', 'text');
-  textBox2.setAttribute('placeholder', 'Textbox 2');
-
-  const textBox3 = document.createElement('input');
-  textBox3.setAttribute('type', 'text');
-  textBox3.setAttribute('placeholder', 'Textbox 3');
-
-  layer.appendChild(textBox1);
-  layer.appendChild(textBox2);
-  layer.appendChild(textBox3);
-
-  document.body.appendChild(layer);
-}
-
+            iframe.style.display = 'none';
+            game.style.display = 'block';
+            backButton.style.display = 'none';
+        }
 
         window.onload = function() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -244,13 +230,15 @@ function handleEarnClick() {
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
-
-        
-   <button id="earnButton" onClick={handleEarnClick}>
-  <img src="earn-logo.png" alt="Earn Logo" />
-  💰 Earn
-</button>
-
+    </div>
+    <iframe id="wallet-frame" src=""></iframe>
+    <button id="back-button" onclick="goBack()">Back to Game</button>
+    <!-- Footer -->
+    <div id="footer">
+        <button class="footer-button" onclick="openWallet()">
+            💰
+            <span>Wallet</span>
+        </button>
         <button class="footer-button" onclick="alert('Tasks button clicked!')">
             ✅
             <span>Tasks</span>
