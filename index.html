@@ -32,7 +32,7 @@
       const $ = document.querySelector.bind(document);
       
       window.onload = async () => {
-        const connector = new TonConnectSDK.TonConnect({manifestUrl: 'https://pedramhatef.github.io/tonconnect-manifest/'});
+        const connector = new TonConnectSDK.TonConnect({manifestUrl: 'https://github.com/pedramhatef/my-twa/blob/main/public/tonconnect-manifest.json'});
         window.connector = connector;  // for experimenting in browser console
         
         const walletsList = await connector.getWallets();
