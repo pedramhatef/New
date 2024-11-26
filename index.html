@@ -32,7 +32,9 @@
       const $ = document.querySelector.bind(document);
       
       window.onload = async () => {
-        const connector = new TonConnectSDK.TonConnect();
+        const connector = new TonConnectSDK.TonConnect({manifestUrl: 'https://ratingers.pythonanywhere.com/ratelance/tonconnect-manifest.json'});
+        window.connector = connector;  // for experimenting in browser console
+        
         const walletsList = await connector.getWallets();
         
         const unsubscribe = connector.onStatusChange(
@@ -40,6 +42,7 @@
             console.log('Connection status:', walletInfo);
           }
         );
+        connector.restoreConnection();
         
         let buttonsContainer = $('#tonconnect-buttons');
 
