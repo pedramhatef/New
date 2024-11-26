@@ -89,35 +89,54 @@
             }).catch(err => console.error("Error saving points:", err));
         }
 
-function connectWallet() {
-    if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-        Telegram.WebApp.init(); // Initialize Telegram Web App
-        const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
-        Telegram.WebApp.openUrl(walletUrl);
-        setTimeout(() => {
-                walletConnected = true;
-                document.getElementById('wallet-status').innerText = 'Wallet Connected!';
-                document.getElementById('connect-wallet').style.display = 'none';
-                saveWalletInfo('TON Wallet Address'); // Replace with actual wallet address logic
-            }, 2000);
+    document.addEventListener("DOMContentLoaded", () => {
+        const connectWalletButton = document.getElementById("connect-wallet");
+        const walletStatus = document.getElementById("wallet-status");
+
+        // Initialize Telegram Web App
+        if (typeof Telegram !== "undefined" && Telegram.WebApp) {
+            Telegram.WebApp.init(); // Initialize Telegram Web App
+        } else {
+            console.warn("Telegram Web App API is not available.");
         }
-    } else {
-        console.error("Telegram Web App API is not available. Are you testing outside Telegram?");
-        alert("Wallet connection only works within the Telegram app.");
-    }
-}
 
+        // Function to connect wallet
+        function connectWallet() {
+            if (typeof Telegram !== "undefined" && Telegram.WebApp) {
+                // Ensure Telegram Web App is initialized
+                Telegram.WebApp.init();
+                
+                // Define the wallet URL
+                const walletUrl = "https://pedramhatef.github.io/my-twa/?chat_id=" + Telegram.WebApp.initDataUnsafe.user.id;
 
-
-        function saveWalletInfo(walletAddress) {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ wallet: walletAddress })
-            }).catch(err => console.error("Error saving wallet info:", err));
+                // Open the wallet URL in Telegram Web App context
+                Telegram.WebApp.openUrl(walletUrl);
+            } else {
+                // Fallback for non-Telegram environments
+                console.error("Telegram Web App API is not available. Are you testing outside Telegram?");
+                alert("Wallet connection only works within the Telegram app.");
+            }
         }
+
+        // Attach event listener to the connect wallet button
+        if (connectWalletButton) {
+            connectWalletButton.addEventListener("click", connectWallet);
+        }
+
+        // Set wallet connection status
+        function setWalletConnected() {
+            walletStatus.innerText = "Wallet Connected!";
+            connectWalletButton.style.display = "none";
+        }
+
+        // Mock successful wallet connection for local testing
+        if (!Telegram || !Telegram.WebApp) {
+            connectWalletButton.addEventListener("click", () => {
+                console.log("Mock wallet connection");
+                setWalletConnected();
+            });
+        }
+    });
 
         window.onload = function() {
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
