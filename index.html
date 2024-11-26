@@ -183,25 +183,46 @@
                 });
         }
 
-        function openWallet() {
-            const iframe = document.getElementById('wallet-frame');
-            const game = document.getElementById('game');
-            const backButton = document.getElementById('back-button');
+        // Extract chat_id from URL query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get("chat_id");
 
-            iframe.src = 'https://pedramhatef.github.io/my-twa/';
-            iframe.style.display = 'block';
-            game.style.display = 'none';
-            backButton.style.display = 'block';
-        }
+        async function openWallet() {
+            const botToken = "7424536311:AAFDWzvMOa-_MuP7Gn2jBQL0_4cCReIzdcc"; // Replace with your bot token
+            const walletUrl = "https://pedramhatef.github.io/my-twa/";
 
-        function goBack() {
-            const iframe = document.getElementById('wallet-frame');
-            const game = document.getElementById('game');
-            const backButton = document.getElementById('back-button');
+            if (!chatId) {
+                alert("Chat ID is missing. Please make sure to include chat_id in the URL.");
+                return;
+            }
 
-            iframe.style.display = 'none';
-            game.style.display = 'block';
-            backButton.style.display = 'none';
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: "Click below to connect your wallet:",
+                        reply_markup: {
+                            inline_keyboard: [[
+                                { text: "Connect Wallet", url: `${walletUrl}?user_id=${chatId}` }
+                            ]]
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.ok) {
+                    alert("Wallet button sent to Telegram!");
+                } else {
+                    alert(`Error: ${result.description}`);
+                }
+            } catch (error) {
+                console.error("Error sending wallet button:", error);
+                alert("Failed to send wallet button.");
+            }
         }
 
         window.onload = function() {
@@ -231,9 +252,7 @@
         <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
     </div>
-    <iframe id="wallet-frame" src=""></iframe>
-    <button id="back-button" onclick="goBack()">Back to Game</button>
-    <!-- Footer -->
+
     <div id="footer">
         <button class="footer-button" onclick="openWallet()">
             💰
