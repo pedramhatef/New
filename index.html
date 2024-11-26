@@ -51,6 +51,29 @@
         #reset:hover {
             background-color: #e63900; /* Darker orange-red */
         }
+        #wallet-frame {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+        #back-button {
+            display: none;
+            position: absolute;
+            top: 104px;
+            left: 5px;
+            padding: 5px 10px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 5px;
+            background-color: #4caf50; /* Green background */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #back-button:hover {
+            background-color: #575;
+        }
         /* Footer styles */
         #footer {
             position: fixed;
@@ -83,7 +106,13 @@
         }
     </style>
     <script>
-        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1'; // Default to 'user1' if no user_id is found
+        let userId;
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+           userId = Telegram.WebApp.initDataUnsafe.user?.id || 'user1'; // Fallback to 'user1' if no user ID
+        } else {
+           console.error("Telegram WebApp API not loaded or initData is unavailable.");
+           userId = 'user1'; // Fallback
+        }
         let secretNumber = Math.floor(Math.random() * 5) + 1;
         let attempts = 0;
         let points = 0;
@@ -106,11 +135,15 @@
         }
 
         function disableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => button.disabled = true);
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = true;
+            });
         }
 
         function enableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => button.disabled = false);
+            document.querySelectorAll('.number-button').forEach(button => {
+                button.disabled = false;
+            });
         }
 
         function resetGame() {
@@ -127,7 +160,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ points })
+                body: JSON.stringify({ points: points })
             });
         }
 
@@ -135,35 +168,51 @@
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
                 .then(response => response.json())
                 .then(data => {
-                    points = data?.points || 0;
-                    document.getElementById('total-points').innerText = points;
+                    if (data && data.points !== undefined) {
+                        points = data.points || 0;
+                        document.getElementById('total-points').innerText = points;
+                        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
+                    } else {
+                        console.warn("No data or points found for user:", userId);
+                        document.getElementById('result').innerText = "Welcome! No points found.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading points:", error);
+                    document.getElementById('result').innerText = "Error loading points. Please try again.";
                 });
         }
 
         function openWallet() {
-            if (window.Telegram?.WebApp) {
-                // Trigger inline button via the Telegram bot
-                window.Telegram.WebApp.sendData("open_wallet");
-            } else {
-                console.error("Telegram WebApp API not loaded correctly.");
-            }
+            const iframe = document.getElementById('wallet-frame');
+            const game = document.getElementById('game');
+            const backButton = document.getElementById('back-button');
+
+            iframe.src = 'https://pedramhatef.github.io/my-twa/';
+            iframe.style.display = 'block';
+            game.style.display = 'none';
+            backButton.style.display = 'block';
         }
 
-        function openTasks() {
-            alert("Tasks button clicked!");
-        }
+        function goBack() {
+            const iframe = document.getElementById('wallet-frame');
+            const game = document.getElementById('game');
+            const backButton = document.getElementById('back-button');
 
-        function openFire() {
-            alert("Fire button clicked!");
+            iframe.style.display = 'none';
+            game.style.display = 'block';
+            backButton.style.display = 'none';
         }
 
         window.onload = function() {
-            if (window.Telegram?.WebApp) {
+            if (window.Telegram && window.Telegram.WebApp) {
                 console.log("Telegram WebApp is loaded!");
+                window.Telegram.WebApp.expand();  // This line will expand the web app to full screen
+                loadPoints();
             } else {
                 console.error("Telegram WebApp API not loaded correctly.");
+                loadPoints();
             }
-            loadPoints();
         };
     </script>
 </head>
@@ -172,22 +221,32 @@
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
         <div>
-            <button class="number-button" onclick="submitGuess(1)">1</button>
-            <button class="number-button" onclick="submitGuess(2)">2</button>
-            <button class="number-button" onclick="submitGuess(3)">3</button>
-            <button class="number-button" onclick="submitGuess(4)">4</button>
-            <button class="number-button" onclick="submitGuess(5)">5</button>
+            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
+            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
+            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
+            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
+            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
         </div>
         <p id="result"></p>
         <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
     </div>
-
+    <iframe id="wallet-frame" src=""></iframe>
+    <button id="back-button" onclick="goBack()">Back to Game</button>
     <!-- Footer -->
     <div id="footer">
-        <button class="footer-button" onclick="openWallet()">💰 Wallet</button>
-        <button class="footer-button" onclick="openTasks()">✅ Tasks</button>
-        <button class="footer-button" onclick="openFire()">🔥 Fire</button>
+        <button class="footer-button" onclick="openWallet()">
+            💰
+            <span>Wallet</span>
+        </button>
+        <button class="footer-button" onclick="alert('Tasks button clicked!')">
+            ✅
+            <span>Tasks</span>
+        </button>
+        <button class="footer-button" onclick="alert('Fire button clicked!')">
+            🔥
+            <span>Fire</span>
+        </button>
     </div>
 </body>
 </html>
