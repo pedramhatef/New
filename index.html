@@ -184,8 +184,15 @@
         }
 
         // Extract chat_id from URL query parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const chatId = urlParams.get("chat_id");
+const urlParams = new URLSearchParams(window.location.search);
+const chatId = urlParams.get("chat_id");
+
+if (chatId) {
+    console.log(`Chat ID retrieved: ${chatId}`);
+} else {
+    alert("Chat ID is missing. Please make sure the URL includes chat_id.");
+}
+
 
         async function openWallet() {
             const botToken = "7424536311:AAFDWzvMOa-_MuP7Gn2jBQL0_4cCReIzdcc"; // Replace with your bot token
