@@ -10,32 +10,28 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
-            background-color: #f0f8ff; /* Light blue background */
+            background-color: #f0f8ff;
             color: #333;
         }
         h1 {
             font-family: 'Press Start 2P', cursive;
-            color: #ff4500; /* Orange-red color */
+            color: #ff4500;
         }
-        #game {
+        #game, #wallet {
             margin-top: 20px;
         }
-        #result {
-            margin-top: 10px;
-        }
-        .number-button {
+        .number-button, #connect-wallet {
             font-size: 1.5em;
             margin: 5px;
             padding: 10px 20px;
             border: none;
             border-radius: 10px;
-            background-color: #4caf50; /* Green background */
+            background-color: #4caf50;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-        .number-button:hover {
-            background-color: #45a049; /* Darker green */
+        .number-button:hover, #connect-wallet:hover {
+            background-color: #45a049;
         }
         #reset {
             display: none;
@@ -43,107 +39,37 @@
             padding: 10px 20px;
             border: none;
             border-radius: 10px;
-            background-color: #ff4500; /* Orange-red background */
+            background-color: #ff4500;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-        #reset:hover {
-            background-color: #e63900; /* Darker orange-red */
-        }
-        #wallet-frame {
-            display: none;
-            width: 100%;
-            height: 100vh;
-            border: none;
-        }
-        #back-button {
-            display: none;
-            position: absolute;
-            top: 104px;
-            left: 5px;
-            padding: 5px 10px;
-            font-size: 0.9em;
-            border: none;
-            border-radius: 5px;
-            background-color: #4caf50; /* Green background */
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #back-button:hover {
-            background-color: #575;
-        }
-        /* Footer styles */
-        #footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #333;
-            color: white;
-            padding: 10px 0;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-        .footer-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: white;
-            font-size: 1.5em;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .footer-button span {
-            margin-top: 5px;
-            font-size: 0.8em;
-        }
-        .footer-button:hover {
-            color: #ff4500; /* Highlight color */
+        #result {
+            margin-top: 10px;
         }
     </style>
     <script>
-        let userId;
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-           userId = Telegram.WebApp.initDataUnsafe.user?.id || 'user1'; // Fallback to 'user1' if no user ID
-        } else {
-           console.error("Telegram WebApp API not loaded or initData is unavailable.");
-           userId = 'user1'; // Fallback
-        }
         let secretNumber = Math.floor(Math.random() * 5) + 1;
         let attempts = 0;
         let points = 0;
+        let walletConnected = false;
+        let userId = new URLSearchParams(window.location.search).get('chat_id') || 'guest';
 
         function submitGuess(guess) {
-            attempts++;
-            let reward = 0;
+            if (!walletConnected) {
+                alert('Please connect your wallet first!');
+                return;
+            }
 
+            attempts++;
             if (guess === secretNumber) {
-                reward = Math.ceil(100 / attempts);
+                let reward = Math.ceil(100 / attempts);
                 points += reward;
                 document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-                document.getElementById('total-points').innerText = points;
                 document.getElementById('reset').style.display = 'block';
-                disableButtons();
-                savePoints();
+                savePoints(points);
             } else {
                 document.getElementById('result').innerText = 'Wrong guess. Try again!';
             }
-        }
-
-        function disableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = true;
-            });
-        }
-
-        function enableButtons() {
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = false;
-            });
         }
 
         function resetGame() {
@@ -151,77 +77,55 @@
             attempts = 0;
             document.getElementById('result').innerText = '';
             document.getElementById('reset').style.display = 'none';
-            enableButtons();
         }
 
-        function savePoints() {
+        function savePoints(points) {
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ points: points })
-            });
+            }).catch(err => console.error("Error saving points:", err));
         }
 
-        function loadPoints() {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.points !== undefined) {
-                        points = data.points || 0;
-                        document.getElementById('total-points').innerText = points;
-                        document.getElementById('result').innerText = `Welcome back! Your total points: ${points}`;
-                    } else {
-                        console.warn("No data or points found for user:", userId);
-                        document.getElementById('result').innerText = "Welcome! No points found.";
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading points:", error);
-                    document.getElementById('result').innerText = "Error loading points. Please try again.";
-                });
+        function connectWallet() {
+            // Redirect or open the wallet TWA
+            const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
+            Telegram.WebApp.openUrl(walletUrl);
+
+            // Mock connection for testing
+            setTimeout(() => {
+                walletConnected = true;
+                document.getElementById('wallet-status').innerText = 'Wallet Connected!';
+                document.getElementById('connect-wallet').style.display = 'none';
+                saveWalletInfo('TON Wallet Address'); // Replace with actual wallet address logic
+            }, 2000);
         }
-        
 
-        async function openWallet() {
-         fetch(`http://localhost:5000/wallet_url?user_id=${userId}`)
-               .then(response => response.json()) 
-               .then(data => {
-                   if (data.wallet_url) {
-                       const iframe = document.getElementById('wallet-frame');
-                       const game = document.getElementById('game');
-                       const backButton = document.getElementById('back-button');
-                       iframe.src = data.wallet_url;
-                       iframe.style.display = 'block';
-                       game.style.display = 'none';
-                       backButton.style.display = 'block';
-                 } else {
-                       console.error("Error: ", data.error);
-                 }
-            })    
-            .catch(error => console.error('Error:', error));
-
-        }
-        function goBack() {
-            const iframe = document.getElementById('wallet-frame');
-            const game = document.getElementById('game');
-            const backButton = document.getElementById('back-button');
-
-            iframe.style.display = 'none';
-            game.style.display = 'block';
-            backButton.style.display = 'none';
+        function saveWalletInfo(walletAddress) {
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ wallet: walletAddress })
+            }).catch(err => console.error("Error saving wallet info:", err));
         }
 
         window.onload = function() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                console.log("Telegram WebApp is loaded!");
-                window.Telegram.WebApp.expand();  // This line will expand the web app to full screen
-                loadPoints();
-            } else {
-                console.error("Telegram WebApp API not loaded correctly.");
-                loadPoints();
-            }
+            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
+                .then(response => response.json())
+                .then(data => {
+                    points = data?.points || 0;
+                    walletConnected = !!data?.wallet;
+                    document.getElementById('result').innerText = `Welcome! Your total points: ${points}`;
+                    if (walletConnected) {
+                        document.getElementById('wallet-status').innerText = 'Wallet Connected!';
+                        document.getElementById('connect-wallet').style.display = 'none';
+                    }
+                })
+                .catch(err => console.error("Error loading user data:", err));
         };
     </script>
 </head>
@@ -229,33 +133,17 @@
     <h1>Guessing Game</h1>
     <div id="game">
         <p>Guess a number between 1 and 5:</p>
-        <div>
-            <button class="number-button" id="btn1" onclick="submitGuess(1)">1</button>
-            <button class="number-button" id="btn2" onclick="submitGuess(2)">2</button>
-            <button class="number-button" id="btn3" onclick="submitGuess(3)">3</button>
-            <button class="number-button" id="btn4" onclick="submitGuess(4)">4</button>
-            <button class="number-button" id="btn5" onclick="submitGuess(5)">5</button>
-        </div>
+        <button class="number-button" onclick="submitGuess(1)">1</button>
+        <button class="number-button" onclick="submitGuess(2)">2</button>
+        <button class="number-button" onclick="submitGuess(3)">3</button>
+        <button class="number-button" onclick="submitGuess(4)">4</button>
+        <button class="number-button" onclick="submitGuess(5)">5</button>
         <p id="result"></p>
-        <p>Total Points: <span id="total-points">0</span></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
     </div>
-    <iframe id="wallet-frame" style="display:none; width:100%; height:80vh;"></iframe>
-    <button id="back-button" style="display:none;" onclick="goBack()">Back to Game</button>
-
-    <div id="footer">
-        <button class="footer-button" onclick="openWallet()">
-            💰
-            <span>Wallet</span>
-        </button>
-        <button class="footer-button" onclick="alert('Tasks button clicked!')">
-            ✅
-            <span>Tasks</span>
-        </button>
-        <button class="footer-button" onclick="alert('Fire button clicked!')">
-            🔥
-            <span>Fire</span>
-        </button>
+    <div id="wallet">
+        <button id="connect-wallet" onclick="connectWallet()">Connect Wallet</button>
+        <p id="wallet-status"></p>
     </div>
 </body>
 </html>
