@@ -106,13 +106,7 @@
         }
     </style>
     <script>
-        let userId;
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-           userId = Telegram.WebApp.initDataUnsafe.user?.id || 'user1'; // Fallback to 'user1' if no user ID
-        } else {
-           console.error("Telegram WebApp API not loaded or initData is unavailable.");
-           userId = 'user1'; // Fallback
-        }
+        let userId = new URLSearchParams(window.location.search).get('user_id') || 'user1'; // Default to 'user1' if no user_id is found
         let secretNumber = Math.floor(Math.random() * 5) + 1;
         let attempts = 0;
         let points = 0;
