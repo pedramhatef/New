@@ -93,43 +93,56 @@
         const connectWalletButton = document.getElementById("connect-wallet");
         const walletStatus = document.getElementById("wallet-status");
 
-        // Function to connect the wallet
-        window.connectWallet = function () {
-            if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-                try {
-                    // Initialize Telegram Web App
-                    if (!Telegram.WebApp.isInitialized) {
-                        Telegram.WebApp.init();
-                    }
+        // Check if Telegram Web App API is available
+        if (typeof Telegram !== "undefined" && Telegram.WebApp) {
+            console.log("Telegram Web App detected.");
 
-                    // Define the wallet URL
-                    const walletUrl =
-                        "https://pedramhatef.github.io/my-twa/?chat_id=" +
-                        Telegram.WebApp.initDataUnsafe?.user?.id;
-
-                    // Open the wallet URL in Telegram Web App
-                    Telegram.WebApp.openUrl(walletUrl);
-                } catch (error) {
-                    console.error("Error initializing Telegram Web App or opening URL:", error);
-                    alert("An error occurred while connecting the wallet.");
+            try {
+                // Initialize Telegram Web App (if not already initialized)
+                if (typeof Telegram.WebApp.init === "function") {
+                    Telegram.WebApp.init();
+                    console.log("Telegram Web App initialized.");
+                } else {
+                    console.warn("Telegram.WebApp.init is not a function.");
                 }
-            } else {
-                console.warn("Telegram Web App API is not available.");
-                alert("Wallet connection only works within the Telegram app.");
+
+                // Define the connectWallet function
+                window.connectWallet = function () {
+                    try {
+                        const userId = Telegram.WebApp.initDataUnsafe?.user?.id;
+                        if (!userId) {
+                            alert("Unable to retrieve user ID. Ensure you are using Telegram.");
+                            return;
+                        }
+
+                        const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
+                        Telegram.WebApp.openUrl(walletUrl);
+                    } catch (error) {
+                        console.error("Error opening wallet URL:", error);
+                        alert("An error occurred while opening the wallet URL.");
+                    }
+                };
+
+                // Attach click event to the button
+                if (connectWalletButton) {
+                    connectWalletButton.addEventListener("click", connectWallet);
+                }
+            } catch (error) {
+                console.error("Error initializing Telegram Web App:", error);
             }
-        };
+        } else {
+            console.warn("Telegram Web App API is not available.");
+            walletStatus.innerText = "Wallet connection only works within the Telegram app.";
 
-        // Attach click event to the button
-        if (connectWalletButton) {
-            connectWalletButton.addEventListener("click", window.connectWallet);
-        }
-
-        // Mock wallet connection for local testing (outside Telegram)
-        if (!Telegram || !Telegram.WebApp) {
-            console.log("Telegram Web App API not detected. Mocking wallet connection.");
-            connectWalletButton.addEventListener("click", () => {
+            // Mock wallet connection for local testing
+            window.connectWallet = function () {
+                alert("Mock Wallet Connected! Telegram Web App API not detected.");
                 walletStatus.innerText = "Mock Wallet Connected!";
-            });
+            };
+
+            if (connectWalletButton) {
+                connectWalletButton.addEventListener("click", connectWallet);
+            }
         }
     });
 
