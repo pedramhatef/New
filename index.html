@@ -34,9 +34,15 @@
       window.onload = async () => {
         const connector = new TonConnectSDK.TonConnect();
         const walletsList = await connector.getWallets();
-
-        let buttonsContainer = $('#tonconnect-buttons');
         
+        const unsubscribe = connector.onStatusChange(
+          walletInfo => {
+            console.log('Connection status:', walletInfo);
+          }
+        );
+        
+        let buttonsContainer = $('#tonconnect-buttons');
+
         for (let wallet of walletsList) {
           let connectButton = document.createElement('button');
           connectButton.innerText = 'Connect with ' + wallet.name;
@@ -47,9 +53,21 @@
             connectButton.classList.add('featured');
           }
           
-          if (!wallet.bridgeUrl && !wallet.injected && !wallet.embedded) {
-            // no `bridgeUrl` means this wallet app is injecting JS code
-            // no `injected` and no `embedded` -> app is inaccessible on this page
+          if (wallet.embedded || wallet.injected) {
+            connectButton.onclick = () => {
+              connectButton.disabled = true;
+              connector.connect({jsBridgeKey: wallet.jsBridgeKey});
+            };
+          } else if (wallet.bridgeUrl) {
+            connectButton.onclick = () => {
+              connectButton.disabled = true;
+              console.log('Connection link:', connector.connect({
+                universalLink: wallet.universalLink,
+                bridgeUrl: wallet.bridgeUrl
+              }));
+            };
+          } else {
+            // wallet app does not provide any auth method
             connectButton.disabled = true;
           }
           
