@@ -103,7 +103,7 @@
                             return;
                         }
                         const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
-                        Telegram.WebApp.openWebView(walletUrl);  // Use openWebView instead of openUrl
+                        Telegram.WebApp.open(walletUrl);  // Use Telegram.WebApp.open for web app context
                     } catch (error) {
                         console.error("Error opening wallet URL:", error);
                         alert("An error occurred while opening the wallet URL.");
