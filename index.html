@@ -12,7 +12,9 @@
             font-family: Arial, sans-serif;
             background-color: #f0f8ff;
             color: #333;
-            overflow: hidden;  /* Prevent body scrolling */
+            overflow: hidden; 
+            overscroll-behavior: none; /* Prevent navigation gestures */
+            touch-action: none; /* Disable touch-based interactions like scroll *//* Prevent body scrolling */
         }
         h1 {
             font-family: 'Press Start 2P', cursive;
@@ -104,14 +106,24 @@
         }
 
         function savePoints(points) {
+            const walletAddress = walletConnected ? "user-wallet-address-placeholder" : null;
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ points: points })
+                body: JSON.stringify({ points, wallet: walletAddress }),
             }).catch(err => console.error("Error saving points:", err));
         }
+        function updateButtonState() {
+            const buttons = document.querySelectorAll('.number-button');
+            buttons.forEach(button => {
+                button.disabled = !walletConnected;
+                button.style.backgroundColor = walletConnected ? '#4caf50' : '#d3d3d3';
+                button.style.cursor = walletConnected ? 'pointer' : 'not-allowed';
+            });
+        }
+
 
         document.addEventListener("DOMContentLoaded", () => {
             const connectWalletButton = document.getElementById("connect-wallet");
@@ -120,6 +132,8 @@
             if (typeof Telegram !== "undefined" && Telegram.WebApp) {
                 console.log("Telegram Web App detected.");
                 Telegram.WebApp.expand();  // Expand the web app to full screen
+                document.body.style.touchAction = 'none'; // Disable touch gestures
+                document.body.style.overflow = 'hidden'; // Disable scrolling
 
                 window.connectWallet = function () {
                     try {
@@ -128,6 +142,16 @@
                             alert("Unable to retrieve user ID. Ensure you are using Telegram.");
                             return;
                         }
+                            try {
+                                 walletConnected = true; // Update the wallet connection state
+                                 updateButtonState(); // Update the button state
+                                 savePoints(points); // Save wallet connection status to the database
+                            } catch (error) {
+                                console.error("Error opening wallet URL:", error);
+                                alert("An error occurred while connecting the wallet.");
+                            }
+              
+                        
                         const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
                         const iframe = document.getElementById('wallet-frame');
                         iframe.src = walletUrl;
@@ -176,7 +200,8 @@
 
         function goBack() {
             const iframe = document.getElementById('wallet-frame');
-            iframe.style.display = 'none';
+            iframe.style.display = 'none';    
+            document.body.style.touchAction = ''; // Restore touch action
             document.body.style.overflow = '';  // Restore body scrolling
             document.getElementById('game').style.display = 'block';
             document.getElementById('back-button').style.display = 'none';
