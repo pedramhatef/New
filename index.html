@@ -93,47 +93,42 @@
         const connectWalletButton = document.getElementById("connect-wallet");
         const walletStatus = document.getElementById("wallet-status");
 
-        // Initialize Telegram Web App
-        if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-            Telegram.WebApp.init(); // Initialize Telegram Web App
-        } else {
-            console.warn("Telegram Web App API is not available.");
-        }
-
-        // Function to connect wallet
-        function connectWallet() {
+        // Function to connect the wallet
+        window.connectWallet = function () {
             if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-                // Ensure Telegram Web App is initialized
-                Telegram.WebApp.init();
-                
-                // Define the wallet URL
-                const walletUrl = "https://pedramhatef.github.io/my-twa/?chat_id=" + Telegram.WebApp.initDataUnsafe.user.id;
+                try {
+                    // Initialize Telegram Web App
+                    if (!Telegram.WebApp.isInitialized) {
+                        Telegram.WebApp.init();
+                    }
 
-                // Open the wallet URL in Telegram Web App context
-                Telegram.WebApp.openUrl(walletUrl);
+                    // Define the wallet URL
+                    const walletUrl =
+                        "https://pedramhatef.github.io/my-twa/?chat_id=" +
+                        Telegram.WebApp.initDataUnsafe?.user?.id;
+
+                    // Open the wallet URL in Telegram Web App
+                    Telegram.WebApp.openUrl(walletUrl);
+                } catch (error) {
+                    console.error("Error initializing Telegram Web App or opening URL:", error);
+                    alert("An error occurred while connecting the wallet.");
+                }
             } else {
-                // Fallback for non-Telegram environments
-                console.error("Telegram Web App API is not available. Are you testing outside Telegram?");
+                console.warn("Telegram Web App API is not available.");
                 alert("Wallet connection only works within the Telegram app.");
             }
-        }
+        };
 
-        // Attach event listener to the connect wallet button
+        // Attach click event to the button
         if (connectWalletButton) {
-            connectWalletButton.addEventListener("click", connectWallet);
+            connectWalletButton.addEventListener("click", window.connectWallet);
         }
 
-        // Set wallet connection status
-        function setWalletConnected() {
-            walletStatus.innerText = "Wallet Connected!";
-            connectWalletButton.style.display = "none";
-        }
-
-        // Mock successful wallet connection for local testing
+        // Mock wallet connection for local testing (outside Telegram)
         if (!Telegram || !Telegram.WebApp) {
+            console.log("Telegram Web App API not detected. Mocking wallet connection.");
             connectWalletButton.addEventListener("click", () => {
-                console.log("Mock wallet connection");
-                setWalletConnected();
+                walletStatus.innerText = "Mock Wallet Connected!";
             });
         }
     });
