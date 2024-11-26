@@ -1,232 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guessing Game</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js" defer></script>
+
     <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
-            color: #333;
-            overflow: hidden; 
-            overscroll-behavior: none; /* Prevent navigation gestures */
-            touch-action: none; /* Disable touch-based interactions like scroll *//* Prevent body scrolling */
-        }
-        h1 {
-            font-family: 'Press Start 2P', cursive;
-            color: #ff4500;
-        }
-        #game, #wallet {
-            margin-top: 20px;
-        }
-        .number-button, #connect-wallet {
-            font-size: 1.5em;
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            background-color: #4caf50;
-            color: white;
-            cursor: pointer;
-        }
-        .number-button:hover, #connect-wallet:hover {
-            background-color: #45a049;
-        }
-        #reset {
-            display: none;
-            margin-top: 20px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            background-color: #ff4500;
-            color: white;
-            cursor: pointer;
-        }
-        #result {
-            margin-top: 10px;
-        }
-        #wallet-frame {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-            border: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;  /* Ensure the iframe is on top */
-        }
-        #back-button {
-            display: none;
-            margin-top: 20px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            background-color: #ff4500;
-            color: white;
-            cursor: pointer;
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1001;  /* Ensure the button is on top */
-        }
+      body {
+        width: 1000px;
+        margin: 0 auto;
+        font-family: Roboto, sans-serif;
+      }
+      .section {
+        padding: 20px; margin: 20px;
+        border: 2px #AEFF6A solid; border-radius: 8px;
+      }
+      #tonconnect-buttons>button {
+        display: block;
+        padding: 8px; margin-bottom: 8px;
+        font-size: 18px; font-family: inherit;
+      }
+      .featured {
+        font-weight: 800;
+      }
     </style>
+  </head>
+  <body>
+    <div class="section" id="tonconnect-buttons">
+    </div>
+    
     <script>
-        let secretNumber = Math.floor(Math.random() * 5) + 1;
-        let attempts = 0;
-        let points = 0;
-        let walletConnected = false;
-        let userId = new URLSearchParams(window.location.search).get('chat_id') || 'guest';
+      const $ = document.querySelector.bind(document);
+      
+      window.onload = async () => {
+        const connector = new TonConnectSDK.TonConnect();
+        const walletsList = await connector.getWallets();
 
-        function submitGuess(guess) {
-            if (!walletConnected) {
-                alert('Please connect your wallet first!');
-                return;
-            }
-            attempts++;
-            if (guess === secretNumber) {
-                let reward = Math.ceil(100 / attempts);
-                points += reward;
-                document.getElementById('result').innerText = `Correct! You earned ${reward} points.`;
-                document.getElementById('reset').style.display = 'block';
-                savePoints(points);
-            } else {
-                document.getElementById('result').innerText = 'Wrong guess. Try again!';
-            }
+        let buttonsContainer = $('#tonconnect-buttons');
+        
+        for (let wallet of walletsList) {
+          let connectButton = document.createElement('button');
+          connectButton.innerText = 'Connect with ' + wallet.name;
+          
+          if (wallet.embedded) {
+            // `embedded` means we are browsing the app from wallet application
+            // we need to mark this sign-in option somehow
+            connectButton.classList.add('featured');
+          }
+          
+          if (!wallet.bridgeUrl && !wallet.injected && !wallet.embedded) {
+            // no `bridgeUrl` means this wallet app is injecting JS code
+            // no `injected` and no `embedded` -> app is inaccessible on this page
+            connectButton.disabled = true;
+          }
+          
+          buttonsContainer.appendChild(connectButton);
         }
-
-        function resetGame() {
-            secretNumber = Math.floor(Math.random() * 5) + 1;
-            attempts = 0;
-            document.getElementById('result').innerText = '';
-            document.getElementById('reset').style.display = 'none';
-        }
-
-        function savePoints(points) {
-            const walletAddress = walletConnected ? "user-wallet-address-placeholder" : null;
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ points, wallet: walletAddress }),
-            }).catch(err => console.error("Error saving points:", err));
-        }
-        function updateButtonState() {
-            const buttons = document.querySelectorAll('.number-button');
-            buttons.forEach(button => {
-                button.disabled = !walletConnected;
-                button.style.backgroundColor = walletConnected ? '#4caf50' : '#d3d3d3';
-                button.style.cursor = walletConnected ? 'pointer' : 'not-allowed';
-            });
-        }
-
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const connectWalletButton = document.getElementById("connect-wallet");
-            const walletStatus = document.getElementById("wallet-status");
-
-            if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-                console.log("Telegram Web App detected.");
-                Telegram.WebApp.expand();  // Expand the web app to full screen
-                document.body.style.touchAction = 'none'; // Disable touch gestures
-                document.body.style.overflow = 'hidden'; // Disable scrolling
-
-                window.connectWallet = function () {
-                    try {
-                        const userId = Telegram.WebApp.initDataUnsafe?.user?.id;
-                        if (!userId) {
-                            alert("Unable to retrieve user ID. Ensure you are using Telegram.");
-                            return;
-                        }
-                            try {
-                                 walletConnected = true; // Update the wallet connection state
-                                 updateButtonState(); // Update the button state
-                                 savePoints(points); // Save wallet connection status to the database
-                            } catch (error) {
-                                console.error("Error opening wallet URL:", error);
-                                alert("An error occurred while connecting the wallet.");
-                            }
-              
-                        
-                        const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
-                        const iframe = document.getElementById('wallet-frame');
-                        iframe.src = walletUrl;
-                        iframe.style.display = 'block';
-                        document.body.style.overflow = 'hidden';  // Prevent body scrolling
-                        document.getElementById('game').style.display = 'none';
-                        document.getElementById('back-button').style.display = 'block';
-                    } catch (error) {
-                        console.error("Error opening wallet URL:", error);
-                        alert("An error occurred while opening the wallet URL.");
-                    }
-                };
-
-                if (connectWalletButton) {
-                    connectWalletButton.addEventListener("click", connectWallet);
-                }
-            } else {
-                console.warn("Telegram Web App API is not available.");
-                walletStatus.innerText = "Wallet connection only works within the Telegram app.";
-
-                window.connectWallet = function () {
-                    alert("Mock Wallet Connected! Telegram Web App API not detected.");
-                    walletStatus.innerText = "Mock Wallet Connected!";
-                };
-
-                if (connectWalletButton) {
-                    connectWalletButton.addEventListener("click", connectWallet);
-                }
-            }
-        });
-
-        window.onload = function() {
-            fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`)
-                .then(response => response.json())
-                .then(data => {
-                    points = data?.points || 0;
-                    walletConnected = !!data?.wallet;
-                    document.getElementById('result').innerText = `Welcome! Your total points: ${points}`;
-                    if (walletConnected) {
-                        document.getElementById('wallet-status').innerText = 'Wallet Connected!';
-                        document.getElementById('connect-wallet').style.display = 'none';
-                    }
-                })
-                .catch(err => console.error("Error loading user data:", err));
-        };
-
-        function goBack() {
-            const iframe = document.getElementById('wallet-frame');
-            iframe.style.display = 'none';    
-            document.body.style.touchAction = ''; // Restore touch action
-            document.body.style.overflow = '';  // Restore body scrolling
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('back-button').style.display = 'none';
-        }
+      };
     </script>
-</head>
-<body>
-    <h1>Guessing Game</h1>
-    <div id="game">
-        <p>Guess a number between 1 and 5:</p>
-        <button class="number-button" onclick="submitGuess(1)">1</button>
-        <button class="number-button" onclick="submitGuess(2)">2</button>
-        <button class="number-button" onclick="submitGuess(3)">3</button>
-        <button class="number-button" onclick="submitGuess(4)">4</button>
-        <button class="number-button" onclick="submitGuess(5)">5</button>
-        <p id="result"></p>
-        <button id="reset" onclick="resetGame()">Reset Game</button>
-    </div>
-
-    <iframe id="wallet-frame"></iframe>
-    <button id="back-button" onclick="goBack()">Back to Game</button>
-
-    <div id="wallet">
-        <button id="connect-wallet" onclick="connectWallet()">Connect Wallet</button>
-        <p id="wallet-status"></p>
-    </div>
-</body>
+  </body>
 </html>
