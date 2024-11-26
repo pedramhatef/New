@@ -89,19 +89,25 @@
             }).catch(err => console.error("Error saving points:", err));
         }
 
-        function connectWallet() {
-            // Redirect or open the wallet TWA
-            const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
-            Telegram.WebApp.openUrl(walletUrl);
-
-            // Mock connection for testing
-            setTimeout(() => {
+function connectWallet() {
+    if (typeof Telegram !== "undefined" && Telegram.WebApp) {
+        Telegram.WebApp.init(); // Initialize Telegram Web App
+        const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
+        Telegram.WebApp.openUrl(walletUrl);
+        setTimeout(() => {
                 walletConnected = true;
                 document.getElementById('wallet-status').innerText = 'Wallet Connected!';
                 document.getElementById('connect-wallet').style.display = 'none';
                 saveWalletInfo('TON Wallet Address'); // Replace with actual wallet address logic
             }, 2000);
         }
+    } else {
+        console.error("Telegram Web App API is not available. Are you testing outside Telegram?");
+        alert("Wallet connection only works within the Telegram app.");
+    }
+}
+
+
 
         function saveWalletInfo(walletAddress) {
             fetch(`https://guess-drop-default-rtdb.firebaseio.com/users/${userId}.json`, {
