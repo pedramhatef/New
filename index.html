@@ -59,7 +59,6 @@
                 alert('Please connect your wallet first!');
                 return;
             }
-
             attempts++;
             if (guess === secretNumber) {
                 let reward = Math.ceil(100 / attempts);
@@ -93,11 +92,9 @@
             const connectWalletButton = document.getElementById("connect-wallet");
             const walletStatus = document.getElementById("wallet-status");
 
-            // Check if Telegram Web App API is available
             if (typeof Telegram !== "undefined" && Telegram.WebApp) {
                 console.log("Telegram Web App detected.");
 
-                // Define the connectWallet function
                 window.connectWallet = function () {
                     try {
                         const userId = Telegram.WebApp.initDataUnsafe?.user?.id;
@@ -105,16 +102,14 @@
                             alert("Unable to retrieve user ID. Ensure you are using Telegram.");
                             return;
                         }
-
                         const walletUrl = `https://pedramhatef.github.io/my-twa/?chat_id=${userId}`;
-                        Telegram.WebApp.openUrl(walletUrl);
+                        Telegram.WebApp.openWebView(walletUrl);  // Use openWebView instead of openUrl
                     } catch (error) {
                         console.error("Error opening wallet URL:", error);
                         alert("An error occurred while opening the wallet URL.");
                     }
                 };
 
-                // Attach click event to the button
                 if (connectWalletButton) {
                     connectWalletButton.addEventListener("click", connectWallet);
                 }
@@ -122,7 +117,6 @@
                 console.warn("Telegram Web App API is not available.");
                 walletStatus.innerText = "Wallet connection only works within the Telegram app.";
 
-                // Mock wallet connection for local testing
                 window.connectWallet = function () {
                     alert("Mock Wallet Connected! Telegram Web App API not detected.");
                     walletStatus.innerText = "Mock Wallet Connected!";
@@ -162,12 +156,10 @@
         <p id="result"></p>
         <button id="reset" onclick="resetGame()">Reset Game</button>
     </div>
+
     <div id="wallet">
         <button id="connect-wallet" onclick="connectWallet()">Connect Wallet</button>
         <p id="wallet-status"></p>
     </div>
 </body>
 </html>
-
-
-
